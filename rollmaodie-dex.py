@@ -51,7 +51,7 @@ draw = ImageDraw.Draw(canvas)
 total = len(items)
 done = len(collected_ids)
 pct = round(done / total * 100) if total else 0
-title = f'\U0001f431 耄耋图鉴  {done}/{total}\uff08{pct}%\uff09'
+title = f'猫 耄耋图鉴  {done}/{total}\uff08{pct}%\uff09'
 bbox = draw.textbbox((0, 0), title, font=font_title)
 tw = bbox[2] - bbox[0]
 draw.text(((W - tw) // 2, 16), title, fill=(255, 200, 60), font=font_title)
