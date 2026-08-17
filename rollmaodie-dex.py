@@ -74,9 +74,13 @@ for i, item in enumerate(items):
 
     img_file = None
     for ext in ['png', 'jpg', 'jpeg', 'webp', 'gif']:
-        p = os.path.join(IMG_DIR, f"{item['id']}.{ext}")
-        if os.path.exists(p):
-            img_file = p
+        # Try name first, then id for backward compatibility
+        for fname in [f"{item['name']}.{ext}", f"{item['id']}.{ext}"]:
+            p = os.path.join(IMG_DIR, fname)
+            if os.path.exists(p):
+                img_file = p
+                break
+        if img_file:
             break
 
     img_size = 60

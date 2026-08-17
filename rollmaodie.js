@@ -90,7 +90,7 @@ export class rollmaodie extends plugin {
     // 找图片（支持 png/jpg/gif/webp）
     let imgPath = null
     for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
-      const p = path.join(PLUGIN_DIR, 'image', `${maodie.id}.${ext}`)
+      const p = path.join(PLUGIN_DIR, 'image', `${maodie.name}.${ext}`)
       if (fs.existsSync(p)) { imgPath = p; break }
     }
     if (imgPath) {
@@ -121,7 +121,7 @@ export class rollmaodie extends plugin {
 
     let imgPath = null
     for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
-      const p = path.join(PLUGIN_DIR, 'image', `${maodie.id}.${ext}`)
+      const p = path.join(PLUGIN_DIR, 'image', `${maodie.name}.${ext}`)
       if (fs.existsSync(p)) { imgPath = p; break }
     }
     if (imgPath) {
@@ -147,7 +147,7 @@ export class rollmaodie extends plugin {
     const msg = list.map(m => {
       let imgMsg = ''
       for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
-        const imgPath = path.join(PLUGIN_DIR, 'image', `${m.id}.${ext}`)
+        const imgPath = path.join(PLUGIN_DIR, 'image', `${m.name}.${ext}`)
         if (fs.existsSync(imgPath)) { imgMsg = segment.image(imgPath); break }
       }
       return [
