@@ -1,6 +1,8 @@
-# TRSS-Yunzai 今日耄耋插件 🐱
+# TRSS-Yunzai 今日耄耋插件 🐊
 
-每日为用户随机抽取专属"今日耄耋"表情，并生成耄耋图鉴收集系统。适用于 [TRSS-Yunzai](https://github.com/TimeRainStarSky/Yunzai) 机器人框架。
+每日为用户随机抽取专属“今日耄耋”表情，并生成耄耋图鉴收集系统。适用于 [TRSS-Yunzai](https://github.com/TimeRainStarSky/Yunzai) 机器人框架。
+
+> 本插件由 AI（OpenClaw / MiMo）编写，包括插件代码、图鉴生成脚本及耄耋表情描述文案。
 
 ## 功能
 
@@ -99,6 +101,7 @@ const DEX_SCRIPT = 'rollmaodie-dex.py 的完整路径'
 - **[nonebot-plugin-rollpig](https://github.com/Bearlele/nonebot-plugin-rollpig)** — NoneBot 版今日小猪插件（原作者：Bearlele）
 - 基于上述项目的图鉴收集机制改造，适配 TRSS-Yunzai 框架
 - 耄耋表情素材来自网络，版权归原作者所有
+- 插件代码及耄耋描述文案由 AI 生成
 
 ## 许可
 
