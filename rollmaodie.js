@@ -44,6 +44,7 @@ export class rollmaodie extends plugin {
       priority: 50,
       rule: [
         { reg: '^#今日耄耋$', fnc: 'rollMaodie' },
+        { reg: '^#随机耄耋$', fnc: 'randomMaodie' },
         { reg: '^#耄耋图鉴$', fnc: 'showCollection' }
       ]
     })
@@ -86,6 +87,37 @@ export class rollmaodie extends plugin {
     ].join('\n')
 
     // 找图片（支持 png/jpg/gif/webp）
+    let imgPath = null
+    for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
+      const p = path.join(PLUGIN_DIR, 'image', `${maodie.id}.${ext}`)
+      if (fs.existsSync(p)) { imgPath = p; break }
+    }
+    if (imgPath) {
+      await e.reply([msg, segment.image(imgPath)])
+    } else {
+      await e.reply(msg)
+    }
+    return true
+  }
+
+  async randomMaodie (e) {
+    if (!maodieList.length) {
+      await e.reply('耄耋库空了...')
+      return true
+    }
+
+    const maodie = maodieList[Math.floor(Math.random() * maodieList.length)]
+    const nickname = e.sender?.card || e.sender?.nickname || ''
+    const msg = [
+      `🎲 随机耄耋 — ${maodie.name}`,
+      '',
+      `「${maodie.description}」`,
+      '',
+      maodie.analysis,
+      '',
+      `— ${nickname}，你随机到了这只耄耋 🐾`
+    ].join('\n')
+
     let imgPath = null
     for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
       const p = path.join(PLUGIN_DIR, 'image', `${maodie.id}.${ext}`)
