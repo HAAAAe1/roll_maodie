@@ -45,6 +45,7 @@ export class rollmaodie extends plugin {
       rule: [
         { reg: '^#今日耄耋$', fnc: 'rollMaodie' },
         { reg: '^#随机耄耋$', fnc: 'randomMaodie' },
+        { reg: '^#查找耄耋\s+(.+)$', fnc: 'searchMaodie' },
         { reg: '^#耄耋图鉴$', fnc: 'showCollection' }
       ]
     })
@@ -127,6 +128,36 @@ export class rollmaodie extends plugin {
       await e.reply([msg, segment.image(imgPath)])
     } else {
       await e.reply(msg)
+    }
+    return true
+  }
+
+  async searchMaodie (e) {
+    const keyword = e.msg.replace(/^#查找耄耋\s*/, '').trim()
+    if (!keyword) {
+      await e.reply('用法：#查找耄耋 名字')
+      return true
+    }
+    const found = maodieList.filter(m => m.name.includes(keyword) || m.id.includes(keyword) || m.description.includes(keyword))
+    if (!found.length) {
+      await e.reply(`没有找到包含「${keyword}」的耄耋`)
+      return true
+    }
+    const list = found.slice(0, 5)
+    const msg = list.map(m => {
+      let imgMsg = ''
+      for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
+        const imgPath = path.join(PLUGIN_DIR, 'image', `${m.id}.${ext}`)
+        if (fs.existsSync(imgPath)) { imgMsg = segment.image(imgPath); break }
+      }
+      return [
+        `🐱 ${m.name} — ${m.description}`,
+        m.analysis,
+        imgMsg
+      ].filter(Boolean)
+    })
+    for (const m of msg) {
+      await e.reply(m)
     }
     return true
   }
