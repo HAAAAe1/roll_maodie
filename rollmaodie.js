@@ -200,34 +200,22 @@ export class rollmaodie extends plugin {
       await e.reply('此功能仅管理员可用')
       return true
     }
-    // 每10条一组，生成转发消息
-    const chunks = []
-    for (let i = 0; i < maodieList.length; i += 5) {
-      const batch = maodieList.slice(i, i + 10)
-      const msgParts = []
-      for (let j = 0; j < batch.length; j++) {
-        const m = batch[j]
-        let imgMsg = ''
-        for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
-          const imgPath = path.join(PLUGIN_DIR, 'image', `${m.name}.${ext}`)
-          if (fs.existsSync(imgPath)) { imgMsg = segment.image(imgPath); break }
-        }
-        msgParts.push(`${i + j + 1}. ${m.name} — ${m.description}\n${m.analysis}`)
-        if (imgMsg) msgParts.push(imgMsg)
+    await e.reply(`📚 开始输出全部耄耋（${maodieList.length}条）...`)
+    for (let i = 0; i < maodieList.length; i++) {
+      const m = maodieList[i]
+      let imgMsg = ''
+      for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
+        const imgPath = path.join(PLUGIN_DIR, 'image', `${m.name}.${ext}`)
+        if (fs.existsSync(imgPath)) { imgMsg = segment.image(imgPath); break }
       }
-      chunks.push(msgParts)
+      const text = `${i + 1}. ${m.name} — ${m.description}\n${m.analysis}`
+      if (imgMsg) {
+        await e.reply([text, imgMsg])
+      } else {
+        await e.reply(text)
+      }
     }
-    // 发送转发消息
-    const msgList = chunks.map(parts => ({
-      message: parts,
-      nickname: e.bot?.nickname || '机器人',
-      user_id: e.bot?.uin || e.self_id
-    }))
-    const sendForward = e.group?.sendForwardMsg || e.friend?.sendForwardMsg
-    if (sendForward) return sendForward(msgList)
-    // 降级为普通消息
-    const fallback = chunks.map(parts => parts.filter(p => typeof p === 'string').join('\n\n')).join('\n\n')
-    await e.reply(fallback)
+    await e.reply('📚 输出完毕')
     return true
   }
 }
