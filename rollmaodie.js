@@ -200,9 +200,30 @@ export class rollmaodie extends plugin {
       await e.reply('此功能仅管理员可用')
       return true
     }
-    const lines = maodieList.map((m, i) => `${i + 1}. ${m.name} — ${m.description}`).join('\n')
-    const msg = `📚 全部耄耋（${maodieList.length}条）\n\n${lines}`
-    await e.reply(msg)
+    // 每10条一组，生成转发消息
+    const chunks = []
+    for (let i = 0; i < maodieList.length; i += 10) {
+      const batch = maodieList.slice(i, i + 10)
+      const lines = batch.map((m, j) => {
+        let imgMsg = ''
+        for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
+          const imgPath = path.join(PLUGIN_DIR, 'image', `${m.name}.${ext}`)
+          if (fs.existsSync(imgPath)) { imgMsg = segment.image(imgPath); break }
+        }
+        return `${i + j + 1}. ${m.name} — ${m.description}\n${m.analysis}`
+      }).join('\n\n')
+      chunks.push(lines)
+    }
+    // 发送转发消息
+    const msgList = chunks.map(text => ({
+      message: text,
+      nickname: e.bot?.nickname || '机器人',
+      user_id: e.bot?.uin || e.self_id
+    }))
+    const sendForward = e.group?.sendForwardMsg || e.friend?.sendForwardMsg
+    if (sendForward) return sendForward(msgList)
+    // 降级为普通消息
+    await e.reply(chunks.join('\n\n'))
     return true
   }
 }
