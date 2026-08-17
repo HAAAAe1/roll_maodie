@@ -201,14 +201,20 @@ export class rollmaodie extends plugin {
       return true
     }
     await e.reply(`📚 开始输出全部耄耋（${maodieList.length}条）...`)
-    for (let i = 0; i < maodieList.length; i += 20) {
-      const batch = maodieList.slice(i, i + 20)
-      const parts = []
+    for (let i = 0; i < maodieList.length; i += 10) {
+      const batch = maodieList.slice(i, i + 10)
+      const msgParts = []
       for (let j = 0; j < batch.length; j++) {
         const m = batch[j]
-        parts.push(`${i + j + 1}. ${m.name} — ${m.description}\n${m.analysis}`)
+        let imgMsg = ''
+        for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
+          const imgPath = path.join(PLUGIN_DIR, 'image', `${m.name}.${ext}`)
+          if (fs.existsSync(imgPath)) { imgMsg = segment.image(imgPath); break }
+        }
+        msgParts.push(`${i + j + 1}. ${m.name} — ${m.description}\n${m.analysis}`)
+        if (imgMsg) msgParts.push(imgMsg)
       }
-      await e.reply(parts.join('\n\n'))
+      await e.reply(msgParts)
     }
     await e.reply('📚 输出完毕')
     return true
