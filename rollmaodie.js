@@ -45,7 +45,7 @@ export class rollmaodie extends plugin {
       rule: [
         { reg: '^#今日耄耋$', fnc: 'rollMaodie' },
         { reg: '^#随机耄耋$', fnc: 'randomMaodie' },
-        { reg: '^#查找耄耋\s+(.+)$', fnc: 'searchMaodie' },
+        { reg: '^#查找耄耋\s*(.+)$', fnc: 'searchMaodie' },
         { reg: '^#耄耋图鉴$', fnc: 'showCollection' }
       ]
     })
