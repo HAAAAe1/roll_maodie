@@ -202,7 +202,7 @@ export class rollmaodie extends plugin {
     }
     // 每10条一组，生成转发消息
     const chunks = []
-    for (let i = 0; i < maodieList.length; i += 10) {
+    for (let i = 0; i < maodieList.length; i += 5) {
       const batch = maodieList.slice(i, i + 10)
       const msgParts = []
       for (let j = 0; j < batch.length; j++) {
