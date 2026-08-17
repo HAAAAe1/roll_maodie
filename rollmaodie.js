@@ -9,6 +9,11 @@ import { execSync } from 'child_process'
 const PLUGIN_DIR = 'D:\\Yz\\TRSS-Yunzai\\plugins\\rollmaodie'
 const PYTHON = 'python'
 const DEX_SCRIPT = 'C:\\Users\\H\\.openclaw\\workspace\\scripts\\rollmaodie-dex.py'
+// 管理员权限从 config.json 读取（不进 git）
+let ADMIN_IDS = []
+try {
+  ADMIN_IDS = JSON.parse(fs.readFileSync(path.join(PLUGIN_DIR, 'config.json'), 'utf8')).adminIds || []
+} catch (e) { ADMIN_IDS = [] }
 
 // 加载耄耋库
 let maodieList = []
@@ -46,7 +51,8 @@ export class rollmaodie extends plugin {
         { reg: '^#今日耄耋$', fnc: 'rollMaodie' },
         { reg: '^#随机耄耋$', fnc: 'randomMaodie' },
         { reg: '^#查找耄耋\s*(.+)$', fnc: 'searchMaodie' },
-        { reg: '^#耄耋图鉴$', fnc: 'showCollection' }
+        { reg: '^#耄耋图鉴$', fnc: 'showCollection' },
+        { reg: '^#全部耄耋$', fnc: 'listAll' }
       ]
     })
   }
@@ -186,6 +192,17 @@ export class rollmaodie extends plugin {
       logger.error('[rollmaodie] 生成图鉴失败:', err.message)
       await e.reply('图鉴生成出错了...')
     }
+    return true
+  }
+
+  async listAll (e) {
+    if (!ADMIN_IDS.includes(String(e.user_id))) {
+      await e.reply('此功能仅管理员可用')
+      return true
+    }
+    const lines = maodieList.map((m, i) => `${i + 1}. ${m.name} — ${m.description}`).join('\n')
+    const msg = `📚 全部耄耋（${maodieList.length}条）\n\n${lines}`
+    await e.reply(msg)
     return true
   }
 }

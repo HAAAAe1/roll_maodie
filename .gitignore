@@ -1,6 +1,9 @@
 # 收藏数据（用户私有）
 collector.json
 
+# 配置文件（含管理员QQ号）
+config.json
+
 # 生成的图鉴图片
 collection_*.png
 
