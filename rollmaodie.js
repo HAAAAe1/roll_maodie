@@ -1,0 +1,128 @@
+// rollmaodie.js - 今日耄耋 🐱
+// 每天每人随机抽取专属耄耋表情 + 耄耋图鉴
+// 用法：#今日耄耋 / #耄耋图鉴
+import fs from 'fs'
+import path from 'path'
+import crypto from 'crypto'
+import { execSync } from 'child_process'
+
+const PLUGIN_DIR = 'D:\\Yz\\TRSS-Yunzai\\plugins\\rollmaodie'
+const PYTHON = 'python'
+const DEX_SCRIPT = 'C:\\Users\\H\\.openclaw\\workspace\\scripts\\rollmaodie-dex.py'
+
+// 加载耄耋库
+let maodieList = []
+try {
+  maodieList = JSON.parse(fs.readFileSync(path.join(PLUGIN_DIR, 'maodie.json'), 'utf8'))
+} catch (e) {
+  logger.error('[rollmaodie] 加载 maodie.json 失败:', e.message)
+}
+
+// 收藏数据持久化
+const COLLECT_FILE = path.join(PLUGIN_DIR, 'collector.json')
+let collector = {}
+try {
+  collector = JSON.parse(fs.readFileSync(COLLECT_FILE, 'utf8'))
+} catch (e) {
+  collector = {}
+}
+
+function saveCollector () {
+  try {
+    fs.writeFileSync(COLLECT_FILE, JSON.stringify(collector, null, 2), 'utf8')
+  } catch (e) {
+    logger.error('[rollmaodie] 保存收藏数据失败:', e.message)
+  }
+}
+
+export class rollmaodie extends plugin {
+  constructor () {
+    super({
+      name: '今日耄耋',
+      dsc: '抽取今天属于你的耄耋表情 + 耄耋图鉴',
+      event: 'message',
+      priority: 50,
+      rule: [
+        { reg: '^#今日耄耋$', fnc: 'rollMaodie' },
+        { reg: '^#耄耋图鉴$', fnc: 'showCollection' }
+      ]
+    })
+  }
+
+  async rollMaodie (e) {
+    if (!maodieList.length) {
+      await e.reply('耄耋库空了...')
+      return true
+    }
+
+    const today = new Date().toISOString().slice(0, 10)
+    const seed = `${today}-${e.user_id}`
+    const hash = crypto.createHash('md5').update(seed).digest('hex')
+    const index = parseInt(hash.slice(0, 8), 16) % maodieList.length
+    const maodie = maodieList[index]
+
+    // 记录收藏
+    const uid = String(e.user_id)
+    if (!collector[uid]) collector[uid] = []
+    const already = collector[uid].some(c => c.id === maodie.id)
+    if (!already) {
+      collector[uid].push({ id: maodie.id, date: today })
+      saveCollector()
+    }
+
+    const collected = collector[uid].length
+    const total = maodieList.length
+    const nickname = e.sender?.card || e.sender?.nickname || ''
+    const msg = [
+      `🐱 今日耄耋 — ${maodie.name}`,
+      '',
+      `「${maodie.description}」`,
+      '',
+      maodie.analysis,
+      '',
+      `— ${nickname}，这是今天属于你的耄耋 🐾`,
+      '',
+      `📊 图鉴进度：${collected}/${total}（${Math.round(collected / total * 100)}%）`
+    ].join('\n')
+
+    // 找图片（支持 png/jpg/gif/webp）
+    let imgPath = null
+    for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
+      const p = path.join(PLUGIN_DIR, 'image', `${maodie.id}.${ext}`)
+      if (fs.existsSync(p)) { imgPath = p; break }
+    }
+    if (imgPath) {
+      await e.reply([msg, segment.image(imgPath)])
+    } else {
+      await e.reply(msg)
+    }
+    return true
+  }
+
+  async showCollection (e) {
+    const uid = String(e.user_id)
+    if (!collector[uid] || !collector[uid].length) {
+      await e.reply('你还没有抽过耄耋呢，先发 #今日耄耋 抽一只吧 🐱')
+      return true
+    }
+
+    await e.reply('正在生成耄耋图鉴... 🐱')
+
+    try {
+      const result = execSync(`${PYTHON} "${DEX_SCRIPT}" ${uid}`, {
+        encoding: 'utf8',
+        timeout: 30000
+      }).trim()
+      const imgPath = result.split('\n').pop()
+      if (imgPath && fs.existsSync(imgPath)) {
+        await e.reply(segment.image(imgPath))
+      } else {
+        await e.reply('图鉴生成失败...')
+      }
+    } catch (err) {
+      logger.error('[rollmaodie] 生成图鉴失败:', err.message)
+      await e.reply('图鉴生成出错了...')
+    }
+    return true
+  }
+}

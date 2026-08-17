@@ -1,0 +1,12 @@
+# 收藏数据（用户私有）
+collector.json
+
+# 生成的图鉴图片
+collection_*.png
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
