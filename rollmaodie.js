@@ -138,7 +138,7 @@ export class rollmaodie extends plugin {
       await e.reply('用法：#查找耄耋 名字')
       return true
     }
-    const found = maodieList.filter(m => m.name.includes(keyword) || m.id.includes(keyword) || m.description.includes(keyword))
+    const found = maodieList.filter(m => m.name === keyword || m.id === keyword)
     if (!found.length) {
       await e.reply(`没有找到包含「${keyword}」的耄耋`)
       return true
