@@ -204,26 +204,30 @@ export class rollmaodie extends plugin {
     const chunks = []
     for (let i = 0; i < maodieList.length; i += 10) {
       const batch = maodieList.slice(i, i + 10)
-      const lines = batch.map((m, j) => {
+      const msgParts = []
+      for (let j = 0; j < batch.length; j++) {
+        const m = batch[j]
         let imgMsg = ''
         for (const ext of ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
           const imgPath = path.join(PLUGIN_DIR, 'image', `${m.name}.${ext}`)
           if (fs.existsSync(imgPath)) { imgMsg = segment.image(imgPath); break }
         }
-        return `${i + j + 1}. ${m.name} — ${m.description}\n${m.analysis}`
-      }).join('\n\n')
-      chunks.push(lines)
+        msgParts.push(`${i + j + 1}. ${m.name} — ${m.description}\n${m.analysis}`)
+        if (imgMsg) msgParts.push(imgMsg)
+      }
+      chunks.push(msgParts)
     }
     // 发送转发消息
-    const msgList = chunks.map(text => ({
-      message: text,
+    const msgList = chunks.map(parts => ({
+      message: parts,
       nickname: e.bot?.nickname || '机器人',
       user_id: e.bot?.uin || e.self_id
     }))
     const sendForward = e.group?.sendForwardMsg || e.friend?.sendForwardMsg
     if (sendForward) return sendForward(msgList)
     // 降级为普通消息
-    await e.reply(chunks.join('\n\n'))
+    const fallback = chunks.map(parts => parts.filter(p => typeof p === 'string').join('\n\n')).join('\n\n')
+    await e.reply(fallback)
     return true
   }
 }
